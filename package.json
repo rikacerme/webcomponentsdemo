@@ -1,0 +1,8 @@
+{
+  "name": "webcomponentsdemo",
+  "version": "0.0.1",
+  "private": true,
+  "dependencies": {
+    "@webcomponents/webcomponentsjs": "2.4.3"
+  }
+}

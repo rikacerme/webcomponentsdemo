@@ -1,0 +1,1 @@
+import './my-parent-element.js';
