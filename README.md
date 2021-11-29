@@ -8,18 +8,26 @@
 
 [Tr]
 Web Components???
+
 Merhabalar ilk medium yazımda web component üzerine paylaşımda bulunacağım. Şimdiden iyi okumalar.
+
 Nedir bu web components?
 Uygulamalarımızı geliştirirken her zaman kod tekrarından kaçınalım deriz buna dikkat ederiz. Yeni uygulamalar gelecek yeniden kod tekrarına dikkat etmemiz gerekecek. Önyüz uygulamaları için bilindik tüm kütüphanelerde component tabanlı geliştirme yapıyoruz. WebComponent olunca ne oluyor? Web component bizim bol bol kullandığımız <div> <span> gibi tagler oluşturmamızı sağlıyor. Bir kere stillerimizi davranışlarını belirlediğimiz <my-alert/> componenti oluşturmamızı ve her yerde kullanmamızı sağlıyor. Peki bunu ne sayesinde yapıyor?
+
 1)Shadowroot
 Componentin ana dom ağacına kapsüllenmiş bir dom olarak çalışmasını sağlar. Çalışan diğer componentlerden ve application dan soyutlanmış şekilde işleri yürütür.
+
 2)custom element
 Componentimizin browserlar tarafından tanınmasını sağlar. customElement.define(param1, param2) diye yazılır. Param1 diye verdiğimiz kısım componentimizin ismini belirler. Param2 ise component oluşturduğumuz classımızı verdiğimiz parametre.
+
 3)html template
 Componentimiz browser tarafından oluşturulurken ekranda ne göstereceğini çıktısının ne olacağını belirttiğimiz kısımdır.
 Daha fazla ayrıntı burada.
+
 Temel olarak webcomponent bu. Yorumlarınız düşüncelerin olursa da bekliyorum.
+
 İlk örneğimizde iki butonu olan ve içinde bir sayısal değer tutan sayaç yapacağız.
+
 Componentimizin son halinde neler var, nasıl görünüyor bir bakalım:
 Başlangıçta componentimiz için <template> oluşturuyoruz . Kullanacağımız html elementlerini tanımlıyoruz. Ardından classımızı tanımlamaya başlıyoruz. Classımız için "CounterComponent" ismini seçtim. Extend ettiğimiz yer "HTMLElement" olduğunu görüyorsunuz. Böylece standart html elementinin üstünde ilerleme kaydedebiliriz.
 
@@ -70,8 +78,8 @@ cursor: pointer;
 }
 button:active {
 background-color: #D9391C;
-border: 1px solid blue;
-border-radius: 50%;
+border: 1px solid red;
+border-radius: 30%;
 }
 button:focus {
 outline: none;
@@ -88,50 +96,43 @@ text-align: center;
 <button id="increaseBtn">+</button>
 <span id="label">0</span>
 <button id="decreaseBtn">-</button>
-`; Buttonların üst kısmında stiller verilmiş durumda. Arkasından class tanımımızı ekliyoruz. export class CounterComponent extends HTMLElement { Class ismimiz "CounterComponent" ve extend edilen yer gördüğünüz gibi basic "HTMLElement". İlk önce class içinde kullanacağım parametreleri tanımlıyorum. Burada takip edeceğim tek parametrem olacak. `static get observedAttributes() {
-return ['value'];
-}
+`;
+
+Buttonların üst kısmında stiller verilmiş durumda. Arkasından class tanımımızı ekliyoruz.
+`export class CounterComponent extends HTMLElement {`
+Class ismimiz "CounterComponent" ve extend edilen yer gördüğünüz gibi basic "HTMLElement". İlk önce class içinde kullanacağım parametreleri tanımlıyorum. Burada takip edeceğim tek parametrem olacak.
+`static get observedAttributes() { return ['value']; }`
+
 Value üzerinde değişiklikler için set-get metotlarını ekliyorum.
-get value() {
-return this.getAttribute('value');
-}
-set value(val) {
-this.setAttribute('value', val);
-}
-`Böylece value ataması olduğunda yada buttonlar tıklandığında attribute de güncellemesini yapmış olacağım. Sonrasında lifecycle adımlarımla devam ediyorum.`constructor() {
-// prototip veya extend olunan yerlerdeki işlemleri miras alabilmek için eklenir.
-super();
-// İsteğe bağlı olarak componentinizi shadow dom içine alabilirsiniz
-this.attachShadow({ mode: 'open' });
-this.shadowRoot.appendChild(template.content.cloneNode(true));
-// Dom elemenlerini oluşturdugumuz değişkenlere atıyoruz
-this.increaseButton = this.shadowRoot.querySelector('#increaseBtn');
-this.decreaseButton = this.shadowRoot.querySelector('#decreaseBtn');
-this.label = this.shadowRoot.querySelector('#label');
-this.value = 0;
-}`Burada componentim shadow içinde oluşması için`this.attachShadow({ mode: 'open' });`ekledim.`this.shadowRoot.appendChild(template.content.cloneNode(true));
-shadowDom içine en başta oluşturduğum html kodunu buraya ekledim.
-this.increaseButton = this.shadowRoot.querySelector('#increaseBtn');
-this.decreaseButton = this.shadowRoot.querySelector('#decreaseBtn');
-this.label = this.shadowRoot.querySelector('#label');
-this.value = 0;`html üzerinde olan button ve label için değişkenlerime atamlarımı yaptım aynı zamanda sayacımın "0" dan başlaması için ilk değer atamamı yaptım. Diğer lifecycle adımıma geçtiğimde:`connectedCallback() {
-// Buttonların click eventlerine dinleyici ekliyoruz
-// addEventListener callback fonksiyonuna kendi componentimizi gönderiyoruz bu context üstünde işlem yapabilmesi için
-this.increaseButton.addEventListener('click', this.\_increase.bind(this));
-this.decreaseButton.addEventListener('click', this.\_decrease.bind(this));
-}`Dom üzerinde bulunan elementlerime eventlistener ları ekledim button tıklandığında sayacımı azaltma ve arttırma fonksiyonlarımı çağırıyorum. Ardından;`disconnectedCallback() {
-// dinleyicileri siliyoruz yine kendi contextimizi göndererek
-this.increaseButton.removeEventListener('click', this.\_increase.bind(this));
-this.decreaseButton.removeEventListener('click', this.\_decrease.bind(this));
-}`Lifcycle da bahsettiğimiz gibi bu adımda html elementimizin ekrandan kaldırıldığı durumlarda eventlistenerlarımızı siliyoruz. Devamında:`attributeChangedCallback(name, oldValue, newValue) {
-this.label.innerHTML = newValue;
-}`Value üzerinde bir değişiklik olduğunda dom üzerinde bulunan değişkenimizi güncelliyoruz. Geriye kalan kısımda arttırma ve azaltma fonksiyonlarımızı ekliyoruz.`\_increase() {
-this.value = parseInt(this.value) + 1;
-}
-\_decrease() {
-this.value = this.value - 1;
-}`Ve en sonunda classımızı kapatıp component tanımımızı ekliyoruz.`}
-customElements.define('my-parent', CounterComponent);`
+`get value() { return this.getAttribute('value'); } set value(val) { this.setAttribute('value', val); }`
+
+Böylece value ataması olduğunda yada buttonlar tıklandığında attribute de güncellemesini yapmış olacağım. Sonrasında lifecycle adımlarımla devam ediyorum.
+`constructor() { // prototip veya extend olunan yerlerdeki işlemleri miras alabilmek için eklenir. super(); // İsteğe bağlı olarak componentinizi shadow dom içine alabilirsiniz this.attachShadow({ mode: 'open' }); this.shadowRoot.appendChild(template.content.cloneNode(true)); // Dom elemenlerini oluşturdugumuz değişkenlere atıyoruz this.increaseButton = this.shadowRoot.querySelector('#increaseBtn'); this.decreaseButton = this.shadowRoot.querySelector('#decreaseBtn'); this.label = this.shadowRoot.querySelector('#label'); this.value = 0; }`
+Burada componentim shadow içinde oluşması için
+`this.attachShadow({ mode: 'open' });`
+ekledim.
+
+`this.shadowRoot.appendChild(template.content.cloneNode(true)); shadowDom içine en başta oluşturduğum html kodunu buraya ekledim. this.increaseButton = this.shadowRoot.querySelector('#increaseBtn'); this.decreaseButton = this.shadowRoot.querySelector('#decreaseBtn'); this.label = this.shadowRoot.querySelector('#label'); this.value = 0;`
+
+html üzerinde olan button ve label için değişkenlerime atamlarımı yaptım aynı zamanda sayacımın "0" dan başlaması için ilk değer atamamı yaptım. Diğer lifecycle adımıma geçtiğimde:
+`connectedCallback() { // Buttonların click eventlerine dinleyici ekliyoruz // addEventListener callback fonksiyonuna kendi componentimizi gönderiyoruz bu context üstünde işlem yapabilmesi için this.increaseButton.addEventListener('click', this.\_increase.bind(this)); this.decreaseButton.addEventListener('click', this.\_decrease.bind(this)); }`
+
+Dom üzerinde bulunan elementlerime eventlistener ları ekledim button tıklandığında sayacımı azaltma ve arttırma fonksiyonlarımı çağırıyorum.
+
+Ardından;
+`disconnectedCallback() { // dinleyicileri siliyoruz yine kendi contextimizi göndererek this.increaseButton.removeEventListener('click', this.\_increase.bind(this)); this.decreaseButton.removeEventListener('click', this.\_decrease.bind(this)); }`
+Lifcycle da bahsettiğimiz gibi bu adımda html elementimizin ekrandan kaldırıldığı durumlarda eventlistenerlarımızı siliyoruz.
+Devamında:
+
+`attributeChangedCallback(name, oldValue, newValue) { this.label.innerHTML = newValue; }`
+
+Value üzerinde bir değişiklik olduğunda dom üzerinde bulunan değişkenimizi güncelliyoruz. Geriye kalan kısımda arttırma ve azaltma fonksiyonlarımızı ekliyoruz.
+
+`\_increase() { this.value = parseInt(this.value) + 1; } \_decrease() { this.value = this.value - 1; }`
+
+Ve en sonunda classımızı kapatıp component tanımımızı ekliyoruz.
+`} customElements.define('my-parent', CounterComponent);`
+
 Şuanda gördüğünüz gibi componentimizi bir file içinde oluşturduk.
 Bunu birde bir html içinde çalıştığını görürsek ilk adım için herşeyi tamamlamış olacağız.
 

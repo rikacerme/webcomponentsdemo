@@ -15,8 +15,8 @@ template.innerHTML = `
 
     button:active {
       background-color: #D9391C;
-      border: 1px solid blue;
-      border-radius: 50%;
+      border: 1px solid red;
+      border-radius: 30%;
     }
 
     button:focus {
